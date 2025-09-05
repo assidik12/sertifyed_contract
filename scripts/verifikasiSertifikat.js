@@ -12,7 +12,7 @@ async function main() {
   console.log("Mempersiapkan verifikasi sertifikat...");
 
   // GANTI DENGAN ALAMAT KONTRAK ANDA
-  const contractAddress = "0x32D60801c5B0a07d0b0586428222ab43953f85B7";
+  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 
   // wallet penerima sertifikat
   const recipientWalletAddress = "0xf567B8302d56b154fF6C4B2B851E433f3039edb0";

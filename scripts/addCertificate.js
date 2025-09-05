@@ -13,7 +13,7 @@ async function main() {
   console.log("Mempersiapkan penerbitan sertifikat...");
 
   // GANTI DENGAN ALAMAT KONTRAK ANDA YANG SUDAH DI-DEPLOY
-  const contractAddress = "0x32D60801c5B0a07d0b0586428222ab43953f85B7";
+  const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
 
   // GANTI DENGAN ALAMAT WALLET MAHASISWA YANG AKAN MENERIMA SERTIFIKAT
   const studentWalletAddress = "0xf567B8302d56b154fF6C4B2B851E433f3039edb0"; // A/n Ahmad Sofi Sidik

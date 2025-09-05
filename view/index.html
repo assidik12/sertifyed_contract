@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8" />
+    <title>DApp SertifyEd</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Import ABI dari file terpisah -->
+    <script src="./abi.js"></script>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
+
+    <div class="max-w-3xl mx-auto py-10 px-4 space-y-6">
+        <h1 class="text-2xl font-bold text-center">🔗 SertifyEd DApp</h1>
+        <p class="text-center text-slate-400">Simulasi interaksi smart contract melalui MetaMask</p>
+
+        <!-- Wallet -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6 space-y-3">
+            <button id="btnConnect"
+                class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-xl">
+                Connect MetaMask
+            </button>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-slate-400">Account</p>
+                    <p id="account" class="font-mono break-all">—</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Chain</p>
+                    <p id="chain" class="font-mono">—</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contract -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6 space-y-3">
+            <h2 class="text-lg font-semibold">📜 Contract</h2>
+            <input id="contractAddress" placeholder="0x..."
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm" />
+            <button id="btnLoad"
+                class="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl font-semibold">Load
+                Contract</button>
+        </div>
+
+        <!-- Issue Certificate -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6 space-y-3">
+            <h2 class="text-lg font-semibold">🎓 Issue Certificate</h2>
+            <input id="toAddress" placeholder="Recipient address"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm" />
+            <input id="dataHash" placeholder="Data hash"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm" />
+            <button id="btnIssue"
+                class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-semibold">Send
+                Transaction</button>
+        </div>
+
+        <!-- Get Certificates -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6 space-y-3">
+            <h2 class="text-lg font-semibold">📑 Get Certificate By Token ID</h2>
+            <input id="tokenId" placeholder="Token ID"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm" />
+            <button id="btnGetToken"
+                class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl font-semibold">Call
+                Function</button>
+        </div>
+
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6 space-y-3">
+            <h2 class="text-lg font-semibold">📑 Get Certificates By Owner</h2>
+            <input id="ownerAddress" placeholder="Owner address"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 font-mono text-sm" />
+            <button id="btnGetOwner"
+                class="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl font-semibold">Call
+                Function</button>
+        </div>
+
+
+        <!-- Output -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl shadow-lg p-6">
+            <h2 class="text-lg font-semibold">🖥 Output</h2>
+            <pre id="output"
+                class="mt-2 bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm overflow-x-auto text-green-400 font-mono">Belum ada output.</pre>
+        </div>
+    </div>
+
+    <script>
+        const { ethers } = window.ethers;
+        let provider, signer, contract;
+
+        const $ = id => document.getElementById(id);
+        const log = msg => $("output").textContent = msg;
+
+
+
+
+        async function connect() {
+            provider = new ethers.BrowserProvider(window.ethereum);
+            await provider.send("eth_requestAccounts", []);
+            signer = await provider.getSigner();
+            const account = await signer.getAddress();
+            const network = await provider.getNetwork();
+            $("account").textContent = account;
+            $("chain").textContent = network.chainId;
+
+            // 👉 Auto-fill ke input Get Certificates By Owner
+            $("ownerAddress").value = account;
+
+            log("✅ MetaMask connected.");
+        }
+
+        async function loadContract() {
+            const address = $("contractAddress").value.trim();
+            if (!address) return log("❌ Masukkan contract address dulu.");
+            contract = new ethers.Contract(address, ABI, signer);
+            log("✅ Contract loaded: " + address);
+        }
+
+        async function issueCertificate() {
+            try {
+                const to = $("toAddress").value.trim();
+                const dataHash = $("dataHash").value.trim();
+                const tx = await contract.issueCertificate(to, dataHash);
+                log("⛽ Tx sent: " + tx.hash);
+                const receipt = await tx.wait();
+                log("✅ Mined in block " + receipt.blockNumber);
+            } catch (e) {
+                log("❌ " + e.message);
+            }
+        }
+
+        async function getCertificatesByTokenId() {
+            try {
+                const tokenId = $("tokenId").value.trim();
+                if (!tokenId) return log("❌ Masukkan Token ID dulu.");
+                const result = await contract.getCertificateDetails(tokenId);
+                console.log(result);
+                log("📄 Certificates: " + JSON.stringify({
+                    address: result[0],
+                    data: result[1]
+                }));
+            } catch (e) {
+                log("❌ " + e.message);
+            }
+        }
+
+        async function getCertificatesByOwner() {
+            try {
+                const owner = $("ownerAddress").value.trim();
+                if (!owner) return log("❌ Masukkan alamat pemilik dulu.");
+                const result = await contract.getCertificatesByOwner(owner);
+
+                // Konversi BigInt → string
+                const converted = result.map(v => v.toString());
+
+                console.log(converted);
+                log("📄 Certificates: " + JSON.stringify(converted, null, 2));
+            } catch (e) {
+                log("❌ " + e.message);
+            }
+        }
+
+        $("btnConnect").onclick = connect;
+        $("btnLoad").onclick = loadContract;
+        $("btnIssue").onclick = issueCertificate;
+        $("btnGetToken").onclick = getCertificatesByTokenId;
+        $("btnGetOwner").onclick = getCertificatesByOwner;
+    </script>
+</body>
+
+</html>
