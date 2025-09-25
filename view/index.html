@@ -134,11 +134,9 @@
             try {
                 const tokenId = $("tokenId").value.trim();
                 if (!tokenId) return log("❌ Masukkan Token ID dulu.");
-                const result = await contract.getCertificateDetails(tokenId);
-                console.log(result);
+                const result = await contract.tokenURI(tokenId);
                 log("📄 Certificates: " + JSON.stringify({
-                    address: result[0],
-                    data: result[1]
+                    data: result
                 }));
             } catch (e) {
                 log("❌ " + e.message);
