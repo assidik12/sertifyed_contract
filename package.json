@@ -5,7 +5,10 @@
   "scripts": {
     "node": "npx hardhat node --hostname 127.0.0.1 --port 8545",
     "deploy": "npx hardhat run scripts/deploy.js --network localhost",
-    "addCertificate": "npx hardhat run scripts/issuerCertificate.js --network localhost"
+    "addCertificate": "npx hardhat run scripts/issuerCertificate.js --network localhost",
+    "security:analyze": "slither contracts/",
+    "security:report": "slither contracts/ --print human-summary",
+    "security:ci": "slither contracts/ --json slither-report.json"
   },
   "keywords": [],
   "author": "",

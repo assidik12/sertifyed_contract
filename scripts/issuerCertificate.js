@@ -39,7 +39,7 @@ async function main() {
   // 2. Deploy Kontrak
   logTitle("DEPLOYMENT");
   // const contract = await ethers.getContractAt("Sertifyed_v2", contractAddress); // Gunakan ini jika kontrak sudah di-deploy
-  const SertifyedFactory = await ethers.getContractFactory("Sertifyed_v2");
+  const SertifyedFactory = await ethers.getContractFactory("sertifyedV2");
   const contract = await SertifyedFactory.deploy(owner.address);
   contractAddress = await contract.getAddress();
   logSection("Alamat Kontrak", contractAddress);
@@ -97,7 +97,7 @@ async function main() {
   // 5. Sisi Relayer: Mengirim Transaksi
   logTitle("SISI RELAYER (ON-CHAIN)");
   logSection("Aksi", "Relayer mengirim transaksi 'mintWithSignature'...");
-  const sertifyEd = await ethers.getContractAt("Sertifyed_v2", contractAddress, owner);
+  const sertifyEd = await ethers.getContractAt("sertifyedV2", contractAddress, owner);
   const txMint = await sertifyEd.mintWithSignature(recipient.address, TOKEN_URI, nonce, signature);
   const receipt = await txMint.wait();
   logSuccess("Transaksi berhasil di-mining!");

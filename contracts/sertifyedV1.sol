@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * - Penambahan fungsi getCertificatesByOwner untuk mendukung fitur galeri sertifikat.
  * - Base URI yang fleksibel dan dapat diatur oleh owner untuk metadata.
  */
-contract SertifyEd is ERC721, Ownable {
+contract sertifyedV1 is ERC721, Ownable {
     // Menggunakan library dari OpenZeppelin untuk konversi uint256 ke string.
     using Strings for uint256;
 

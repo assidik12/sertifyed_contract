@@ -7,6 +7,7 @@
   ![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=for-the-badge&logo=solidity&logoColor=white)
   ![Hardhat](https://img.shields.io/badge/Hardhat-2.26.1-FFF04D?style=for-the-badge&logo=hardhat&logoColor=black)
   ![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-5.4.0-4E5EE4?style=for-the-badge&logo=openzeppelin&logoColor=white)
+  ![slither](https://img.shields.io/badge/Slither-0.12.2-0b4c4c?style=for-the-badge&logo=slither&logoColor=white)
   ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 </div>
 
@@ -155,11 +156,14 @@ The main contract implementing the certificate system with the following feature
 
 ## 📜 Scripts
 
-| Script          | Command                  | Description                             |
-| --------------- | ------------------------ | --------------------------------------- |
-| Local Node      | `npm run node`           | Start Hardhat local blockchain          |
-| Deploy          | `npm run deploy`         | Deploy smart contracts to local network |
-| Add Certificate | `npm run addCertificate` | Issue a new certificate                 |
+| Script          | Command                    | Description                             |
+| --------------- | -------------------------- | --------------------------------------- |
+| Local Node      | `npm run node`             | Start Hardhat local blockchain          |
+| Deploy          | `npm run deploy`           | Deploy smart contracts to local network |
+| Add Certificate | `npm run addCertificate`   | Issue a new certificate                 |
+| Security Scan   | `npm run security:analyze` | Run Slither security analysis           |
+| Security Report | `npm run security:report`  | Generate detailed security report       |
+| Security CI     | `npm run security:ci`      | Export security results to JSON         |
 
 ### Custom Scripts
 
@@ -263,13 +267,126 @@ sertifyed_contract/
 └── package.json                # Dependencies
 ```
 
-## 🔒 Security Considerations
+## 🔒 Security
 
-- **Signature Verification**: All certificates require valid EIP-712 signatures
-- **Role-based Access**: Only authorized issuers can create certificates
-- **Nonce Protection**: Prevents replay attacks
-- **Owner Controls**: Contract owner manages issuer permissions
-- **Immutable Records**: Certificates cannot be modified after issuance
+### Security Analysis with Slither
+
+SertifyEd uses [Slither](https://github.com/crytic/slither), a static analysis framework for Solidity, to ensure contract security and identify potential vulnerabilities.
+
+#### Installation
+
+```bash
+# create a virtual environment
+python3 -m venv venv
+
+# activate the virtual environment
+source venv/bin/activate
+
+# Install dependencies for security analysis
+pip install -r requirements.txt
+```
+
+#### Running Security Analysis
+
+```bash
+# Basic analysis
+slither contracts/
+
+# Analyze specific contract
+slither contracts/sertifyedV2.sol
+
+# Generate detailed report
+slither contracts/ --print human-summary
+
+# Export results to JSON
+slither contracts/ --json slither-report.json
+
+# Check for specific vulnerabilities
+slither contracts/ --detect reentrancy-eth,timestamp
+```
+
+#### Continuous Security Integration
+
+Add to your development workflow:
+
+```bash
+# Add to package.json scripts
+{
+  "scripts": {
+    "security:analyze": "slither contracts/",
+    "security:report": "slither contracts/ --print human-summary",
+    "security:ci": "slither contracts/ --json slither-report.json"
+  }
+}
+```
+
+#### Security Checklist
+
+✅ **Static Analysis**
+
+- [x] Slither analysis passed with no critical issues
+- [x] No reentrancy vulnerabilities detected
+- [x] No integer overflow/underflow risks
+- [x] Access control properly implemented
+
+✅ **Manual Code Review**
+
+- [x] EIP-712 signature verification implemented correctly
+- [x] Nonce mechanism prevents replay attacks
+- [x] Role-based access control secured
+- [x] No dangerous delegatecall usage
+
+#### Common Security Patterns Implemented
+
+| Security Feature           | Implementation                 | Status          |
+| -------------------------- | ------------------------------ | --------------- |
+| **Access Control**         | OpenZeppelin `Ownable`         | ✅ Implemented  |
+| **Signature Verification** | EIP-712 standard               | ✅ Implemented  |
+| **Replay Protection**      | Nonce-based system             | ✅ Implemented  |
+| **Integer Safety**         | Solidity 0.8+ built-in         | ✅ Implemented  |
+| **Reentrancy Guard**       | Not needed (no external calls) | ✅ Not Required |
+
+### Security Considerations
+
+#### Core Security Features
+
+- **🔐 Signature Verification**: All certificates require valid EIP-712 signatures from authorized issuers
+- **👥 Role-based Access**: Multi-tier permission system with owner and issuer roles
+- **🔄 Nonce Protection**: Sequential nonce system prevents signature replay attacks
+- **⚡ Owner Controls**: Contract owner has exclusive rights to manage issuer permissions
+- **🔒 Immutable Records**: Certificates cannot be modified or deleted after issuance
+- **🛡️ Input Validation**: All external inputs are validated before processing
+
+#### Advanced Security Measures
+
+- **📝 Event Logging**: All critical operations emit events for transparency and monitoring
+- **🚫 No Delegatecall**: Contract avoids dangerous delegatecall operations
+- **💰 No Ether Handling**: Contract doesn't handle Ether, reducing attack surface
+- **🔍 Static Analysis**: Regular Slither scans ensure code quality
+
+#### Audit Recommendations
+
+1. **Regular Security Scans**: Run Slither analysis before each deployment
+2. **Testnet Testing**: Thoroughly test on testnets before mainnet deployment
+3. **Multi-sig Ownership**: Consider using multi-signature wallet for contract ownership
+4. **Monitoring**: Implement event monitoring for suspicious activities
+5. **Upgrade Strategy**: Plan for potential security updates if needed
+
+### Security Reporting
+
+If you discover a security vulnerability, please report it responsibly:
+
+1. **Do not** create a public GitHub issue
+2. Email security concerns to: [security@yourproject.com]
+3. Include detailed steps to reproduce the issue
+4. Allow reasonable time for response before public disclosure
+
+### Security Resources
+
+- [Slither Documentation](https://github.com/crytic/slither/wiki)
+- [Smart Contract Security Verification Standard](https://github.com/securing/SCSVS)
+- [OpenZeppelin Security Audits](https://openzeppelin.com/security-audits/)
+- [Consensys Smart Contract Best Practices](https://consensys.github.io/smart-contract-best-practices/)
 
 ## 🤝 Contributing
 

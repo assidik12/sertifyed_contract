@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -9,8 +9,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Nonces.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Sertifyed_v2 is ERC721URIStorage, ERC721Enumerable, EIP712, Ownable, Nonces {
+
+contract sertifyedV2 is ERC721URIStorage, ERC721Enumerable, EIP712, Ownable, Nonces, ReentrancyGuard {
 
     uint256 private _tokenIdCounter;
     bytes32 private constant CERTIFICATE_TYPEHASH =
@@ -30,7 +32,7 @@ contract Sertifyed_v2 is ERC721URIStorage, ERC721Enumerable, EIP712, Ownable, No
         emit IssuerStatusChanged(_issuer, _status);
     }
 
-    function mintWithSignature(address recipient, string calldata _tokenURI, uint256 nonce, bytes calldata signature) public returns (uint256) {
+    function mintWithSignature(address recipient, string calldata _tokenURI, uint256 nonce, bytes calldata signature) public nonReentrant returns (uint256) {
         address signer = _verifySignature(recipient, _tokenURI, nonce, signature);
         require(isIssuer[signer], "Sertifyed: Signer is not a registered issuer");
         _useNonce(signer);
@@ -71,27 +73,28 @@ contract Sertifyed_v2 is ERC721URIStorage, ERC721Enumerable, EIP712, Ownable, No
             nonce
         ));
 
-        // 2. Gunakan _hashTypedDataV4 yang akan menggabungkan
-        //    structHash dengan domain separator kontrak.
+        // 2. Gunakan _hashTypedDataV4 yang akan menggabungkan structHash dengan domain separator kontrak.
         bytes32 digest = _hashTypedDataV4(structHash);
 
         // 3. Pulihkan alamatnya
         return ECDSA.recover(digest, signature);
-        }
+    }
+
 
     // Fungsi ini untuk keperluan testing saja.
-    function getCertificatesByOwner(address owner) public view returns (uint256[] memory) {
-        uint256 balance = balanceOf(owner);
+    function getCertificatesByOwner(address recipient) public view returns (uint256[] memory) {
+        uint256 balance = balanceOf(recipient);
         uint256[] memory tokenIds = new uint256[](balance);
         for (uint256 i = 0; i < balance; i++) {
-            tokenIds[i] = tokenOfOwnerByIndex(owner, i);
+            tokenIds[i] = tokenOfOwnerByIndex(recipient, i);
         }
         return tokenIds;
-        }
-
-        function getCertificatesById(uint256 tokenId) public view returns (string memory) {
-            require(_ownerOf(tokenId) != address(0), "Sertifyed: Token ID does not exist");
-            return tokenURI(tokenId);
-        }
-
     }
+
+
+    function getCertificatesById(uint256 tokenId) public view returns (string memory) {
+        require(_ownerOf(tokenId) != address(0), "Sertifyed: Token ID does not exist");
+        return tokenURI(tokenId);
+    }
+
+}

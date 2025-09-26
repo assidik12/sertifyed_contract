@@ -1,6 +1,18 @@
 node_modules
 .env
 
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env.local/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
 # Hardhat files
 /cache
 /artifacts
